@@ -1,10 +1,12 @@
 [package]
-name = "butter-up-rs"
+name = "pico-portal-rs"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
 bevy = "0.15.3"
+bevy_asset = { version = "0.15.3", features = ["asset_processor"] }
+bevy_internal = "0.15.3"
 
 [profile.dev]
 # Enable a small amount of optimization in the dev profile.
@@ -32,3 +34,13 @@ inherits = "release"
 opt-level = "s"
 # Strip all debugging information from the binary to slightly reduce file size.
 strip = "debuginfo"
+
+# Enable wayland support
+[features]
+default = ["wayland"]
+
+# Wayland display server support
+wayland = ["bevy_internal/wayland"]
+asset_processor = ["bevy_asset/asset_processor"]
+file_watcher = ["bevy_asset/file_watcher"]
+webgl2 = ["bevy_internal/webgl"]
