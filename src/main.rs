@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 mod game;
+mod player;
 mod resolution;
 
 fn main() {

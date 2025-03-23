@@ -1,12 +1,12 @@
 use bevy::prelude::*;
 
-use crate::resolution;
+use crate::{player, resolution};
 
 pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((resolution::ResolutionPlugin,))
+        app.add_plugins((resolution::ResolutionPlugin, player::PlayerPlugin))
             .add_systems(Startup, setup_scene);
     }
 }
