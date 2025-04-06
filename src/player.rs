@@ -1,4 +1,5 @@
-use bevy::prelude::*;
+use bevy::{math::VectorSpace, prelude::*};
+use bevy_rapier2d::prelude::*;
 use num::clamp;
 
 use crate::resolution;
@@ -32,7 +33,10 @@ fn setup_player(
 ) {
     commands.spawn((
         player_resources.front.clone(),
-        Transform::from_xyz(0., 0., 0.).with_scale(Vec3::splat(resolution.pixel_ratio)),
+        RigidBody::Dynamic,
+        Collider::ball(5.0),
+        Restitution::coefficient(0.7),
+        Transform::from_xyz(0., 200., 0.).with_scale(Vec3::splat(resolution.pixel_ratio)),
         Player {},
     ));
 }
