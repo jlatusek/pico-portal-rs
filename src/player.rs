@@ -1,10 +1,10 @@
-use bevy::prelude::*;
+use bevy::{math::VectorSpace, prelude::*};
 use bevy_rapier2d::prelude::*;
 
 use crate::resolution;
 
 const SPEED: f32 = 2000.0;
-const JUMP: f32 = 400.0;
+const JUMP: f32 = 40.0;
 
 pub struct PlayerPlugin;
 
@@ -37,6 +37,10 @@ fn setup_player(
             linvel: Vec2::ZERO,
             angvel: 0.,
         },
+        ExternalImpulse {
+            impulse: Vec2::ZERO,
+            torque_impulse: 0.0,
+        },
         Damping {
             linear_damping: 0.5,
             angular_damping: 1.1,
@@ -57,12 +61,17 @@ fn update_player(
     keys: Res<ButtonInput<KeyCode>>,
     resolution: Res<resolution::Resolution>,
     time: Res<Time>,
-    mut player_query: Query<(&mut Player, &mut Velocity, &Transform)>,
+    mut player_query: Query<(&mut Player, &mut Velocity, &mut ExternalImpulse, &Transform)>,
 ) {
-    let (_, mut velocity, transform) = player_query.single_mut();
+    let (_, mut velocity, mut impulse, transform) = player_query.single_mut();
     let direction = (((keys.pressed(KeyCode::KeyD) || keys.pressed(KeyCode::ArrowRight)) as i32)
         - ((keys.pressed(KeyCode::KeyA) || keys.pressed(KeyCode::ArrowLeft)) as i32))
         as f32;
+    let jump = keys.pressed(KeyCode::KeyW) || keys.pressed(KeyCode::ArrowUp);
+    if jump {
+        impulse.impulse = Vec2::new(0.0, 100000.0);
+    }
+
     velocity.linvel += Vec2::new(direction * SPEED * time.delta_secs(), 0.0);
     let bound = resolution.screen_dimensions.x / 2.;
     if transform.translation.x >= bound {
