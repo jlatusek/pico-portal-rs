@@ -1,12 +1,10 @@
-use bevy::{math::VectorSpace, prelude::*};
+use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use num::clamp;
 
 use crate::resolution;
 
-const SPEED: f32 = 200.;
-const JUMP: f32 = 400.;
-const GRAVITY: f32 = 300.;
+const SPEED: f32 = 2000.0;
+const JUMP: f32 = 400.0;
 
 pub struct PlayerPlugin;
 
@@ -35,6 +33,14 @@ fn setup_player(
         player_resources.front.clone(),
         RigidBody::Dynamic,
         Collider::ball(5.0),
+        Velocity {
+            linvel: Vec2::ZERO,
+            angvel: 0.,
+        },
+        Damping {
+            linear_damping: 0.5,
+            angular_damping: 1.1,
+        },
         Restitution::coefficient(0.7),
         Transform::from_xyz(0., 200., 0.).with_scale(Vec3::splat(resolution.pixel_ratio)),
         Player {},
@@ -51,14 +57,22 @@ fn update_player(
     keys: Res<ButtonInput<KeyCode>>,
     resolution: Res<resolution::Resolution>,
     time: Res<Time>,
-    mut player_query: Query<(&mut Player, &mut Transform)>,
+    mut player_query: Query<(&mut Player, &mut Velocity, &Transform)>,
 ) {
-    let (_, mut transform) = player_query.single_mut();
+    let (_, mut velocity, transform) = player_query.single_mut();
     let direction = (((keys.pressed(KeyCode::KeyD) || keys.pressed(KeyCode::ArrowRight)) as i32)
         - ((keys.pressed(KeyCode::KeyA) || keys.pressed(KeyCode::ArrowLeft)) as i32))
         as f32;
-    transform.translation.x += direction * time.delta_secs() * SPEED;
+    velocity.linvel += Vec2::new(direction * SPEED * time.delta_secs(), 0.0);
     let bound = resolution.screen_dimensions.x / 2.;
-
-    transform.translation.x = clamp(transform.translation.x, -bound, bound);
+    if transform.translation.x >= bound {
+        if velocity.linvel.x >= 0.0 {
+            velocity.linvel.x = 0.0;
+        }
+    }
+    if transform.translation.x <= -bound {
+        if velocity.linvel.x <= 0.0 {
+            velocity.linvel.x = 0.0;
+        }
+    }
 }
