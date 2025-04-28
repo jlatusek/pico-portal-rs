@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{ground, player, resolution};
+use crate::{camera, ground, player, resolution};
 
 pub struct GamePlugin;
 
@@ -10,14 +10,10 @@ impl Plugin for GamePlugin {
         app.add_plugins((
             resolution::ResolutionPlugin,
             player::PlayerPlugin,
+            camera::CameraPlugin,
             ground::GroundPlugin,
         ))
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
-        .add_plugins(RapierDebugRenderPlugin::default())
-        .add_systems(Startup, setup_scene);
+        .add_plugins(RapierDebugRenderPlugin::default());
     }
-}
-
-fn setup_scene(mut commands: Commands) {
-    commands.spawn(Camera2d::default());
 }

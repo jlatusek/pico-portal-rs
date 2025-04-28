@@ -4,6 +4,7 @@ mod game;
 mod player;
 mod resolution;
 mod ground;
+mod camera;
 
 fn main() {
     println!("Hello, from new pico-portal!");
