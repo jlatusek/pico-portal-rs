@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{camera, ground, player, resolution, scene, sprites};
+use crate::{camera, event_manager, ground, player, resolution, scene, sprites};
 
 pub struct GamePlugin;
 
@@ -10,6 +10,7 @@ impl Plugin for GamePlugin {
         app.add_plugins((
             resolution::ResolutionPlugin,
             sprites::SpritesPlugin,
+            event_manager::ControlPlugin,
             scene::ScenePlugin,
             player::PlayerPlugin,
             camera::CameraPlugin,

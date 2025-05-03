@@ -7,6 +7,7 @@ mod ground;
 mod camera;
 mod scene;
 mod sprites;
+mod event_manager;
 
 fn main() {
     println!("Hello, from new pico-portal!");

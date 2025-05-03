@@ -1,10 +1,13 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{resolution, sprites};
+use crate::{
+    event_manager::{self, Action},
+    resolution, sprites,
+};
 
 const SPEED: f32 = 2000.0;
-const JUMP: f32 = 40.0;
+const JUMP: f32 = 100000.;
 
 pub struct PlayerPlugin;
 
@@ -52,18 +55,27 @@ fn setup_player(
 }
 
 fn update_player(
-    keys: Res<ButtonInput<KeyCode>>,
+    mut player_action_reader: EventReader<event_manager::PlayerEvent>,
+    mut player_query: Query<(&mut Player, &mut Velocity, &mut ExternalImpulse, &Transform)>,
     resolution: Res<resolution::Resolution>,
     time: Res<Time>,
-    mut player_query: Query<(&mut Player, &mut Velocity, &mut ExternalImpulse, &Transform)>,
 ) {
     let (_, mut velocity, mut impulse, transform) = player_query.single_mut();
-    let direction = (((keys.pressed(KeyCode::KeyD) || keys.pressed(KeyCode::ArrowRight)) as i32)
-        - ((keys.pressed(KeyCode::KeyA) || keys.pressed(KeyCode::ArrowLeft)) as i32))
-        as f32;
-    let jump = keys.pressed(KeyCode::KeyW) || keys.pressed(KeyCode::ArrowUp);
-    if jump {
-        impulse.impulse = Vec2::new(0.0, 100000.0);
+
+    let mut direction = 0.;
+
+    for action in player_action_reader.read() {
+        match action.action {
+            Action::LEFT => {
+                direction -= 1.;
+            }
+            Action::RIGHT => {
+                direction += 1.;
+            }
+            Action::JUMP => {
+                impulse.impulse = Vec2::new(0.0, JUMP);
+            }
+        };
     }
 
     velocity.linvel += Vec2::new(direction * SPEED * time.delta_secs(), 0.0);
