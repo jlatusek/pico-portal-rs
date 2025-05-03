@@ -1,10 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{
-    event_manager::{self, Action},
-    resolution, sprites,
-};
+use crate::{event_manager, resolution, sprites};
 
 const SPEED: f32 = 2000.0;
 const JUMP: f32 = 100000.;
@@ -66,13 +63,13 @@ fn update_player(
 
     for action in player_action_reader.read() {
         match action.action {
-            Action::LEFT => {
+            event_manager::Action::LEFT => {
                 direction -= 1.;
             }
-            Action::RIGHT => {
+            event_manager::Action::RIGHT => {
                 direction += 1.;
             }
-            Action::JUMP => {
+            event_manager::Action::JUMP => {
                 impulse.impulse = Vec2::new(0.0, JUMP);
             }
         };

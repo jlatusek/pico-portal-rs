@@ -23,6 +23,7 @@ impl Plugin for ControlPlugin {
 fn update_control_events(
     keys: Res<ButtonInput<KeyCode>>,
     mut player_action_writer: EventWriter<PlayerEvent>,
+    mut app_exit_events: EventWriter<AppExit>,
 ) {
     if keys.pressed(KeyCode::KeyA) || keys.pressed(KeyCode::ArrowLeft) {
         player_action_writer.send(PlayerEvent {
@@ -38,5 +39,8 @@ fn update_control_events(
         player_action_writer.send(PlayerEvent {
             action: Action::JUMP,
         });
+    }
+    if keys.pressed(KeyCode::KeyQ) {
+        app_exit_events.send(AppExit::Success);
     }
 }
