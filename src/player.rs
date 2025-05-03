@@ -33,6 +33,8 @@ fn setup_player(
         ),
         RigidBody::Dynamic,
         Collider::ball(5.0),
+        // ActiveEvents::COLLISION_EVENTS,
+        ActiveHooks::FILTER_INTERSECTION_PAIR,
         Velocity {
             linvel: Vec2::ZERO,
             angvel: 0.,
@@ -47,11 +49,13 @@ fn setup_player(
         },
         Restitution::coefficient(0.7),
         Transform::from_xyz(0., 200., 0.).with_scale(Vec3::splat(resolution.pixel_ratio)),
+        CollisionGroups::new(Group::GROUP_1, Group::GROUP_1),
         Player {},
     ));
 }
 
 fn update_player(
+    rapier_context: ReadRapierContext,
     mut player_action_reader: EventReader<event_manager::PlayerMoveEvent>,
     player_query: Single<(
         &mut Player,
@@ -59,11 +63,12 @@ fn update_player(
         &mut ExternalImpulse,
         &Transform,
         &mut Sprite,
+        &Collider,
     )>,
     resolution: Res<resolution::Resolution>,
     time: Res<Time>,
 ) {
-    let (_, mut velocity, mut impulse, transform, mut sprite) = player_query.into_inner();
+    let (_, mut velocity, mut impulse, transform, mut sprite, collider) = player_query.into_inner();
 
     let mut direction = 0.;
 
@@ -81,6 +86,19 @@ fn update_player(
         };
         set_texture(&move_event, &mut sprite);
     }
+    let filter = QueryFilter::only_fixed()
+        .groups(CollisionGroups::new(Group::GROUP_1, Group::GROUP_2));
+    rapier_context.single().intersections_with_shape(
+        transform.translation.truncate(),
+        0.0,
+        &collider,
+        filter,
+        |entity| {
+            // This closure is called for each intersecting entity
+            println!("Collision detected with entity: {:?}", entity);
+            true // Return true to continue checking other intersections
+        },
+    );
 
     velocity.linvel += Vec2::new(direction * SPEED * time.delta_secs(), 0.0);
     let bound = resolution.screen_dimensions.x / 2.;

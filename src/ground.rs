@@ -9,7 +9,8 @@ impl Plugin for GroundPlugin {
 }
 
 fn setup_ground(mut commands: Commands) {
-    commands
-        .spawn(Collider::cuboid(500.0, 50.0))
-        .insert(Transform::from_xyz(0.0, -200.0, 0.0));
+    commands.spawn(Collider::cuboid(500.0, 50.0)).insert((
+        Transform::from_xyz(0.0, -200.0, 0.0),
+        CollisionGroups::new(Group::GROUP_1 | Group::GROUP_2, Group::GROUP_1),
+    ));
 }
