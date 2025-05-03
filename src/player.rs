@@ -1,7 +1,7 @@
-use bevy::{math::VectorSpace, prelude::*};
+use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::resolution;
+use crate::{resolution, sprites};
 
 const SPEED: f32 = 2000.0;
 const JUMP: f32 = 40.0;
@@ -10,8 +10,7 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PreStartup, load_sprites)
-            .add_systems(Startup, setup_player)
+        app.add_systems(Startup, setup_player)
             .add_systems(Update, update_player);
     }
 }
@@ -19,18 +18,19 @@ impl Plugin for PlayerPlugin {
 #[derive(Component)]
 pub struct Player;
 
-#[derive(Resource)]
-pub struct PlayerResources {
-    front: Sprite,
-}
-
 fn setup_player(
     mut commands: Commands,
     resolution: Res<resolution::Resolution>,
-    player_resources: Res<PlayerResources>,
+    sprites: Res<sprites::Sprites>,
 ) {
     commands.spawn((
-        player_resources.front.clone(),
+        Sprite::from_atlas_image(
+            sprites.player.image.clone(),
+            TextureAtlas {
+                layout: sprites.player.atlas.clone(),
+                index: sprites::SpriteState::FRONT as usize,
+            },
+        ),
         RigidBody::Dynamic,
         Collider::ball(5.0),
         Velocity {
@@ -49,12 +49,6 @@ fn setup_player(
         Transform::from_xyz(0., 200., 0.).with_scale(Vec3::splat(resolution.pixel_ratio)),
         Player {},
     ));
-}
-
-fn load_sprites(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let player_image: Handle<Image> = asset_server.load("player-front.png");
-    let sprite = Sprite::from_image(player_image);
-    commands.insert_resource(PlayerResources { front: sprite });
 }
 
 fn update_player(
