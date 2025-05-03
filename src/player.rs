@@ -53,11 +53,17 @@ fn setup_player(
 
 fn update_player(
     mut player_action_reader: EventReader<event_manager::PlayerEvent>,
-    mut player_query: Query<(&mut Player, &mut Velocity, &mut ExternalImpulse, &Transform)>,
+    player_query: Single<(
+        &mut Player,
+        &mut Velocity,
+        &mut ExternalImpulse,
+        &Transform,
+        &mut Sprite,
+    )>,
     resolution: Res<resolution::Resolution>,
     time: Res<Time>,
 ) {
-    let (_, mut velocity, mut impulse, transform) = player_query.single_mut();
+    let (_, mut velocity, mut impulse, transform, mut sprite) = player_query.into_inner();
 
     let mut direction = 0.;
 
@@ -73,6 +79,7 @@ fn update_player(
                 impulse.impulse = Vec2::new(0.0, JUMP);
             }
         };
+        set_texture(&action.action, &mut sprite);
     }
 
     velocity.linvel += Vec2::new(direction * SPEED * time.delta_secs(), 0.0);
@@ -85,6 +92,24 @@ fn update_player(
     if transform.translation.x <= -bound {
         if velocity.linvel.x <= 0.0 {
             velocity.linvel.x = 0.0;
+        }
+    }
+}
+
+fn set_texture(action: &event_manager::Action, sprite: &mut Sprite) {
+    if let Some(atlas) = &mut sprite.texture_atlas {
+        match action {
+            event_manager::Action::LEFT => {
+                atlas.index = sprites::SpriteState::SIDE as usize;
+                sprite.flip_x = true;
+            }
+            event_manager::Action::RIGHT => {
+                atlas.index = sprites::SpriteState::SIDE as usize;
+                sprite.flip_x = false;
+            }
+            event_manager::Action::JUMP => {
+                atlas.index = sprites::SpriteState::JUMP as usize;
+            }
         }
     }
 }
