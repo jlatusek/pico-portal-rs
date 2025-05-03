@@ -52,7 +52,7 @@ fn setup_player(
 }
 
 fn update_player(
-    mut player_action_reader: EventReader<event_manager::PlayerEvent>,
+    mut player_action_reader: EventReader<event_manager::PlayerMoveEvent>,
     player_query: Single<(
         &mut Player,
         &mut Velocity,
@@ -67,19 +67,19 @@ fn update_player(
 
     let mut direction = 0.;
 
-    for action in player_action_reader.read() {
-        match action.action {
-            event_manager::Action::LEFT => {
+    for move_event in player_action_reader.read() {
+        match move_event {
+            event_manager::PlayerMoveEvent::LEFT => {
                 direction -= 1.;
             }
-            event_manager::Action::RIGHT => {
+            event_manager::PlayerMoveEvent::RIGHT => {
                 direction += 1.;
             }
-            event_manager::Action::JUMP => {
+            event_manager::PlayerMoveEvent::JUMP => {
                 impulse.impulse = Vec2::new(0.0, JUMP);
             }
         };
-        set_texture(&action.action, &mut sprite);
+        set_texture(&move_event, &mut sprite);
     }
 
     velocity.linvel += Vec2::new(direction * SPEED * time.delta_secs(), 0.0);
@@ -96,18 +96,18 @@ fn update_player(
     }
 }
 
-fn set_texture(action: &event_manager::Action, sprite: &mut Sprite) {
+fn set_texture(move_event: &event_manager::PlayerMoveEvent, sprite: &mut Sprite) {
     if let Some(atlas) = &mut sprite.texture_atlas {
-        match action {
-            event_manager::Action::LEFT => {
+        match move_event {
+            event_manager::PlayerMoveEvent::LEFT => {
                 atlas.index = sprites::SpriteState::SIDE as usize;
                 sprite.flip_x = true;
             }
-            event_manager::Action::RIGHT => {
+            event_manager::PlayerMoveEvent::RIGHT => {
                 atlas.index = sprites::SpriteState::SIDE as usize;
                 sprite.flip_x = false;
             }
-            event_manager::Action::JUMP => {
+            event_manager::PlayerMoveEvent::JUMP => {
                 atlas.index = sprites::SpriteState::JUMP as usize;
             }
         }
